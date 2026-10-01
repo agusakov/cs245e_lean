@@ -122,6 +122,7 @@ example : A → A ∨ B := by
 example (h : A → B) : (A ∨ C) → (B ∨ C) := by
   sorry
 
+-- Challenge: see if you can use `obtain` on a subformula instead of the whole formula.
 example (h : A ∧ (B ∨ C)) : (A ∧ B) ∨ (A ∧ C) := by
   sorry
 
