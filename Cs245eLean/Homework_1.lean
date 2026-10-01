@@ -33,6 +33,7 @@ variable {A B C D : Prop} -- this is a declaration that `A B C D` are all propos
     this tactic to change our goal to `⊢ A`. This tactic is similar to `(→-)`.
   `exact h` - if we have hypothesis `h : A` that matches our goal `⊢ A`, we can use
     `exact` to close the goal.
+    * Note: We can also use `apply` in place of `exact`.
  -/
 
 /- **Examples** -/
