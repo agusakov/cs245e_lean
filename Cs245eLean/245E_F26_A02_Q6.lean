@@ -1,3 +1,4 @@
+import Mathlib.Data.Nat.Basic
 /- **Lean Proofs**
   The basic blocks of Lean proofs are called tactics. Tactics behave somewhat like our
   formal deduction rules, in that they manipulate either the premises or goal. However,
@@ -49,14 +50,18 @@ theorem hypothetical_syllogism (h1 : A → B) (h2 : B → C) : A → C := by
 /- **Exercises** -/
 -- Note: This one only works in this direction!
 example (h : (A → B) → C) : A → (B → C) := by
-  sorry
+  intros hA
+  intros hB
+  apply h
+  intros hB2
+  apply hB
 
 /- **Conjunction**
 
   For conjunction, we have the following tactics:
   `refine ⟨?_, ?_⟩` - this takes a goal of the form `⊢ A ∧ B` and breaks it up into two
     separate goals, `⊢ A` and `⊢ B`. We denote the subgoals by using `·` in front of them
-    and indenting them. This is similar to our `(∧+)` tactic.
+    and indenting them (Lean is whitespace sensitive). This is similar to our `(∧+)` tactic.
       * Note: The angle brackets `⟨ ⟩` are constructors for a conjunction, so
         if we had premises `ha : A` and `hb : B`, we could inline our proof as
         `refine ⟨ha, hb⟩`. We use `?_` to tell Lean to create subgoals.
@@ -77,22 +82,34 @@ example (hab : A ∧ B) : B ∧ A := by
   · exact hab.right -- This is like `(∧-)`
   · exact hab.left -- This is like `(∧-)`
 
--- equivalently, can also inline the subgoals:
-example (hab : A ∧ B) : B ∧ A := by
-  refine ⟨hab.2, hab.1⟩
+example (hab : A ∧ B) : B ∧ A := ⟨hab.2, hab.1⟩
 
 /- **Exercises** -/
 example (h : A ∧ B → C) : A → B → C := by
-  sorry
+  intros hA hB
+  apply h
+  refine ⟨hA, hB⟩
 
 example (h : A → B → C) : A ∧ B → C := by
-  sorry
+  intros hab
+  apply h
+  · exact hab.left
+  · exact hab.right
 
 example (h : A → B) : (A ∧ C) → (B ∧ C) := by
-  sorry
+  intros hac
+  refine ⟨?_, ?_⟩
+  · apply h
+    exact hac.left
+  · exact hac.right
 
 example (h : (A → B) ∧ (C → D)) : (A ∧ C) → (B ∧ D) := by
-  sorry
+  intros hac
+  refine ⟨?_, ?_⟩
+  · apply h.left
+    exact hac.left
+  · apply h.right
+    exact hac.right
 
 
 /- **Disjunction**
@@ -120,7 +137,13 @@ example : A → A ∨ B := by
 
 /- **Exercises** -/
 example (h : A → B) : (A ∨ C) → (B ∨ C) := by
-  sorry
+  intros hac
+  obtain ha | hc := hac
+  · left
+    apply h
+    exact ha
+  · right
+    exact hc
 
 -- Challenge: see if you can use `obtain` on a subformula instead of the whole formula.
 example (h : A ∧ (B ∨ C)) : (A ∧ B) ∨ (A ∧ C) := by
