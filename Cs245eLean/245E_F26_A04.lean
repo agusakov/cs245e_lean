@@ -6,9 +6,7 @@ import Lean.Meta.Tactic.Refl
   Last assignment, we worked with some tactics that behave similarly to our propositional
   logic formal deduction proof rules. Here, we will see how to use tactics for formal
   first order logic proofs. As in the previous assignment, your goal is to replace the
-  `sorry`s with proofs in a way where Lean will not give you errors.
-
-  Our limited tactic list for this assignment will be the following.-/
+  `sorry`s with proofs in a way where Lean will not give you errors.-/
 
 variable {α : Type*} -- `α` can be viewed as our domain
 variable {a b : α} -- `a` and `b` are terms of type `α`, or elements of our domain
