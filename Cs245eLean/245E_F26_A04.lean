@@ -4,29 +4,46 @@ import Lean.Meta.Tactic.Refl
 
 /-! **Lean Proofs**
   Last assignment, we worked with some tactics that behave similarly to our propositional
-  logic formal deduction proof rules. Here, we will see how to use tactics for formal
-  first order logic proofs. As in the previous assignment, your goal is to replace the
+  logic formal deduction proof rules. Here, we will continue using the tactics we did before, but
+  we will also see how to use them for formal first order logic proofs (as well as new tactics).
+
+  In Lean, our propositional logic formulas were terms of type `Prop`.
+  In first order logic, we require
+    - a domain
+    - individual symbols + free variables
+    - relations
+    - functions
+  We can accomplish this using types, and maps `→` from the domain to `Prop` -/
+
+/- Our domain can be an arbitrary type, where elements of the domain are terms of its type: -/
+variable {α : Type*} -- `α` is our domain
+variable {a b : α} -- `a` and `b` are terms of type `α`, or elements of our domain
+
+/- Then for relations, we map from `a` into `Prop`. -/
+variable {F G H : α → Prop} -- `F`, `G`, `H` are all maps from `α` to `Prop`.
+
+/- As in the previous assignment, your goal is to replace the
   `sorry`s with proofs in a way where Lean will not give you errors.-/
 
-variable {α : Type*} -- `α` can be viewed as our domain
-variable {a b : α} -- `a` and `b` are terms of type `α`, or elements of our domain
-variable {F G H : α → Prop} -- we can think of relations as maps from the domain to `Prop`
 
-/- **For All**
+/- **Section 1: For All**
 
-  `intros a` - we can also use this when the goal is of the form `⊢ ∀ x, F x`.
-    If `F` is a relation on terms of type `α`, i.e. `F : α → Prop`, then when
-    we use `intros` it adds `a : a` to our premise set and our goal becomes `⊢ F a`.
-    In this way, `intros` also behaves like `(∀+)`.
-  `specialize h a` - if we have a hypothesis `h` of the form `h : ∀ x, F x`, and
-    term `a : α` whose type matches the domain of `F : α → Prop`, then `specialize h a`
-     plugs `a` into the for all statement to transform `h` into the premise `h : F a`.
-     This is similar to `(∀-)`, but note that we don't require explicitly showing
-     the for all statement as a consequence of our premises, we can just use it
-     directly on the premise in question.
+  `intros a` - we used this before for `→` statements, but we can also use this when the goal is
+    of the form `⊢ ∀ x, F x`, where `F : α → Prop`. When we use `intros` it adds `a : α` to our
+    premise set, and our goal becomes `⊢ F a`.
+
+    In this way, `intros` behaves like `(∀+)`.
+
+  `specialize h a` - if we have a hypothesis `h : ∀ x, F x` where `F : α → Prop`, and term
+    `a : α`, then `specialize h a` plugs `a` into the for all statement to obtain new premise
+    `h : F a`.
+
+     This is similar to `(∀-)`, but note that `specialize` works on premises, whereas
+     `(∀-)` works on previous conclusions.
+
   *Note:* you actually don't really need `specialize` as a separate tactic - if you have
     `h : ∀ x, F x` where `F : α → Prop`, and you have term `a : α`, then `h a` will already be
-    a term of type `F a`, i.e. `h : F a`. This also works for implication, if `h : A → B` and
+    a term of type `F a`, i.e. `h a : F a`. This also works for implication, if `h : A → B` and
     you have a term `a : A`, then `h a : B`.
  -/
 
@@ -43,7 +60,7 @@ example (hFG : ∀ x, F x → G x) (hF : ∀ x, F x) : ∀ x, G x := by
   apply hFG
   exact hF a
 
-/- **Exercises** -/
+/- **For All Exercises** -/
 example : ∀ x, F x → F x := by
   sorry
 
@@ -56,14 +73,19 @@ example (hFG : ∀ x, (F x ∧ G x)) : (∀ x, F x) ∧ (∀ x, G x) := by
 example (hFG : (∀ x, F x) ∨ (∀ x, G x)) : ∀ x, (F x ∨ G x) := by
   sorry
 
-/- **There Exists**
+/- **Section 2: There Exists**
 
-  `use` - this behaves like `(∃+)`. When we have a goal of the form `⊢ ∃ x, F x` where
-    `F : α → Prop`, and a term `a : α`, the tactic `use a` will replace the goal with
-    `⊢ F a`.
+  `use` - When we have a goal of the form `⊢ ∃ x, F x` where `F : α → Prop`, and a term `a : α`,
+    the tactic `use a` will replace the goal with `⊢ F a`.
+
+    This tactic behaves like `(∃+)`.
+
   `obtain ⟨a, hFa⟩ := hF`- if we have premise `hF : ∃ x, F x` where `F : α → Prop`, this will
-    break it down to produce terms `a : α` and `hFa : F a` in our premise set.
-    *Note:* We are again using the angle bracket syntax here - this is because it can also be
+    break `hF` down to produce terms `a : α` and `hFa : F a` in our premise set.
+
+    This tactic behaves like `(∃-)`.
+
+  *Note:* We are again using the angle bracket syntax here - this is because it can also be
       used as a constructor for ∃ statements. As an alternative to `use`, we can actually use
       the `refine ⟨a, hFa⟩` tactic if we want to.
     - constructors can actually be nested - if we wanted to break down something like
@@ -91,7 +113,7 @@ example (hFG : ∀ x, F x → G x) (hF : ∃ x, F x) : ∃ x, G x := by
   obtain ⟨a, ha⟩ := hF
   refine ⟨_, hFG a ha⟩
 
-/- **Exercises** -/
+/- **Exists Exercises** -/
 example (hFG : ∃ x, F x ∨ G x) : (∃ x, F x) ∨ (∃ x, G x) := by
   sorry
 
@@ -102,14 +124,19 @@ example (hFG : (∃ x, F x) ∨ (∃ x, G x)) : ∃ x, F x ∨ G x := by
   sorry
 
 
-/- **Equals**
+/- **Section 3: Equals**
 
-  `rw` - also known as "rewrite". This behaves like `(≈-)`. If you have premise `h : t₁ = t₂` and
-    `⊢ A(t₁)`, then `rw [h]` will replace the goal with `A(t₂)`. You can also rewrite backwards
-    with `rw [← h]`.
+  `rw` - also known as "rewrite". If you have premise `h : t₁ = t₂` and goal `⊢ A(t₁)`, then
+    `rw [h]` will replace the goal with `A(t₂)`. You can also rewrite backwards with `rw [← h]`.
+
+    This behaves like `(≈-)`.
+
     *Note:* `rw` also works on premises - if we have premise `hA : A(t₁)`
     then `rw [h] at hA` will change it to `hA : A(t₂)`.
+
+
   `rfl`- if the goal is of the form `⊢ u = u` then `rfl` will simply close the goal, like `(≈+)`.
+
     *Note:* A lot of the time, we actually won't necessarily see `⊢ u = u` in the goal - if we
     got to that point via `rw`, the `rw` tactic actually itself applies `rfl`, so it will often
     close the goal for us.
@@ -119,7 +146,7 @@ example (hFG : (∃ x, F x) ∨ (∃ x, G x)) : ∃ x, F x ∨ G x := by
 example : a = a := by
   rfl
 
-/- **Exercises** -/
+/- **Equals Exercises** -/
 example (hab : a = b) (hFG : ∀ x, F x → G x) (hFa : F a) : G b := by
   sorry
 
@@ -127,14 +154,7 @@ example (hFa : F a) : ∃ x, x = a → F x := by
   sorry
 
 
-/- **Another note on `rw`**
-  We can actually also use `rw` for `iff` statements. We haven't used them much in our Lean
-  homework assignments, but if we can prove an iff statement, we can use it together with
-  `rw` similarly to our replaceability theorem in formal deduction.
--/
-
-
-/- **DeMorgan's Laws for Quantifiers** -/
+/- **Section 4: DeMorgan's Laws for Quantifiers** -/
 -- *Note:* you will need to use `by_contra` for some of these problems.
 theorem DML_helper_1 (hF : ¬ ∃ x, F x) : ∀ x, ¬ F x := by
   sorry
@@ -159,7 +179,13 @@ theorem DML_2 : (¬ ∀ x, F x) ↔ (∃ x, ¬ F x) :=
 -- both directions. One constructor we haven't touched on is `fun h => ?_`, which behaves
 -- like an inline version of `intros` for both `→` and `∀` statements.
 
-/- With these theorems, we can swap out one premise for another. Try using `rw` with our theorems
+/- **Section 5: Additional Exercises** -/
+/- **Another note on `rw`**
+  We can actually also use `rw` for `iff` statements. We haven't used them much in our Lean
+  homework assignments, but if we can prove an iff statement, we can use it together with
+  `rw` similarly to our replaceability theorem in formal deduction.
+
+  With our DML theorems, we can swap out one premise for another. Try using `rw` with our theorems
   `DML_1` and `DML_2` (or you can prove these directly). -/
 example (hF : ¬ ∀ x, F x) (hFG : ∀ x, (¬ F x → G x)) : ∃ x, G x := by
   sorry
@@ -167,7 +193,6 @@ example (hF : ¬ ∀ x, F x) (hFG : ∀ x, (¬ F x → G x)) : ∃ x, G x := by
 example (hF : ¬ ∃ x, F x) (hFG : ∀ x, (¬ F x → G x)) : ∀ x, G x := by
   sorry
 
-/- **Additional Exercises** -/
 -- Note: you don't need `by_contra` or `DML` for this one
 example (hFH : (∀ x, F x) → (∃ x, H x)) (hFG : ∀ x, (F x ∧ G x)) : ∃ x, H x := by
   sorry
